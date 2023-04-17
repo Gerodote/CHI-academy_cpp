@@ -4,3 +4,5 @@ How to check it:
 3. `cmake --build ./build`
 4. `cd build`
 5. `ctest`
+
+In main CMakeLists.txt you can change c++ standard to c++17, if you wanna. If you want try more old standard ( or compiler without std::filesystem, like android's natives c++17 compiler...), you shall need install boost's filessystem lib, then a little bit change headers and CMakeLists.txt
