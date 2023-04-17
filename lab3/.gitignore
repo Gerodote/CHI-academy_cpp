@@ -31,6 +31,8 @@
 *.out
 *.app
 
+
+CMakeLists.txt.user
 CMakeCache.txt
 CMakeFiles
 CMakeScripts
@@ -42,5 +44,5 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 
+.cache/
 build/
-.vscode/

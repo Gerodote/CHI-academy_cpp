@@ -3,7 +3,7 @@ project(lab1 VERSION 0.1.0)
 
 
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 add_library(compiler_flags INTERFACE)
