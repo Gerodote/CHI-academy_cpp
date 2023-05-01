@@ -2,17 +2,10 @@
 #define SRC_MATRIX_LIB_INCLUDE_MATRIX
 
 /*
- * WARNING : NEXT CODE IS A GARBAGE. DO NOT USE IN ANY PLACE.
- *
- * why the next code is a piece of garbage:
- * 1. it uses std::vector < std::vector > , which means more bad memory usage
- * and perhaps bad perfomance.
- * 2. the code uses operator[] instead of operator(row,column). It is not good
+ * 1. the code uses operator[] instead of operator(row,column). It is not good
  * because it is not encapsulating the class. go for some ideas here:
  * http://www.parashift.com/c++-faq-lite/operator-overloading.html#faq-13.10
- * 3. the code cannot be easily adapted for processing units like GPU.
- * 4. no compile time stuff.
- * 5. It initializes at 0 0. + inefficiency.
+ * 2. the code cannot be easily adapted for processing units like GPU.
  *
  * Q: ok, what use instead?
  * A: Any math matrix library e.g. Eigen, ArrayFire or something else.
@@ -33,9 +26,6 @@
 #include <type_traits>
 #include <vector>
 
-// template <typename T>
-// constexpr std::ostream& specific_printer(std::ostream & out, const T& val);
-
 template <typename T>
 constexpr std::ostream &specific_printer(
     std::ostream &out,
@@ -51,10 +41,6 @@ constexpr std::ostream &specific_printer(
   out << val << '|';
   return out;
 };
-
-// using index_t = std::size_t;
-// template <index_t N, index_t M, typename T = int>
-// class Matrix;
 
 template <typename T = int,
           template <class, typename...> class row_container = std::vector,
@@ -217,11 +203,14 @@ public:
 
   constexpr const_reverse_iterator crend() { return data__.crend(); }
 
-  constexpr friend std::ostream &operator<<(std::ostream &out,
-                                            const Matrix<T, row_container, col_container> &m) {
-    for (typename std::remove_reference<decltype(m)>::type::matrix_type::size_type i = 0; i < m.data__.size();
-         ++i) {
-      for (typename std::remove_reference<decltype(m)>::type::vector_type::size_type ii = 0;
+  constexpr friend std::ostream &
+  operator<<(std::ostream &out,
+             const Matrix<T, row_container, col_container> &m) {
+    for (typename std::remove_reference<
+             decltype(m)>::type::matrix_type::size_type i = 0;
+         i < m.data__.size(); ++i) {
+      for (typename std::remove_reference<
+               decltype(m)>::type::vector_type::size_type ii = 0;
            ii < m.data__[0].size(); ++ii) {
         // SFINAE. could be done using if constexpr.
         specific_printer<T>(out, m.data__[i][ii]);
