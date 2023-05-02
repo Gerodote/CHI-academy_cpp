@@ -125,6 +125,12 @@ int main() {
       if (s4 != s3) {
         std::cerr << "Test 16 failed. a result of comparisong: " << (s4 != s3);
       }
+      
+
+      int res_test_18 = s4.rank();
+      
+      std::cout << res_test_18 << '\n';
+      
     }
     {
       Matrix<std::string> str_m =
@@ -141,11 +147,19 @@ int main() {
                   << (res_test_17);
       }
 
+
       
 
-      constexpr std::array<std::array<int, 2>, 2> const_arr{{{1, 2}, {3, 4}}};
+      constexpr std::array<std::array<int, 2>, 2> const_arr{{{1, 2}, {2, 4}}};
 
       constexpr Matrix<int, arr_si_2, arr_si_2> const_m = const_arr;
+      
+      constexpr auto const_m2 = -const_m;
+
+      constexpr int a_rank = const_m.rank();
+
+      std::cout << a_rank << '\n';
+
 
       std::cout << const_m;
 

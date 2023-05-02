@@ -88,13 +88,16 @@ public:
     }
   }
 
-  constexpr Matrix<T> &operator+=(const Matrix<T> &b) {
+  constexpr Matrix<T, row_container, col_container> &
+  operator+=(const Matrix<T, row_container, col_container> &b) {
     if (b.size() != this->size()) {
       throw std::invalid_argument("Matrices do not have same size.");
     }
-    for (typename Matrix<T>::matrix_type::size_type i = 0; i < b.data__.size();
-         ++i) {
-      for (typename Matrix<T>::vector_type::size_type ii = 0;
+    for (typename Matrix<T, row_container,
+                         col_container>::matrix_type::size_type i = 0;
+         i < b.data__.size(); ++i) {
+      for (typename Matrix<T, row_container,
+                           col_container>::vector_type::size_type ii = 0;
            ii < b.data__[0].size(); ++ii) {
         data__[i][ii] += b.data__[i][ii];
       }
@@ -103,13 +106,16 @@ public:
     return *this;
   }
 
-  constexpr Matrix<T> &operator-=(const Matrix<T> &b) {
+  constexpr Matrix<T, row_container, col_container> &
+  operator-=(const Matrix<T, row_container, col_container> &b) {
     if (b.size() != this->size()) {
       throw std::invalid_argument("Matrices do not have same size.");
     }
-    for (typename Matrix<T>::matrix_type::size_type i = 0; i < b.data__.size();
-         ++i) {
-      for (typename Matrix<T>::vector_type::size_type ii = 0;
+    for (typename Matrix<T, row_container,
+                         col_container>::matrix_type::size_type i = 0;
+         i < b.data__.size(); ++i) {
+      for (typename Matrix<T, row_container,
+                           col_container>::vector_type::size_type ii = 0;
            ii < b.data__[0].size(); ++ii) {
         data__[i][ii] -= b.data__[i][ii];
       }
@@ -117,32 +123,36 @@ public:
     return *this;
   }
 
-  constexpr Matrix<T> operator+(const Matrix<T> &b) const {
-    Matrix<T> tmp(*this);
+  constexpr Matrix<T, row_container, col_container>
+  operator+(const Matrix<T, row_container, col_container> &b) const {
+    Matrix<T, row_container, col_container> tmp(*this);
     tmp += b;
     return tmp;
   }
 
-  constexpr Matrix<T> operator-(const Matrix<T> &b) const {
-    Matrix<T> tmp(*this);
+  constexpr Matrix<T, row_container, col_container>
+  operator-(const Matrix<T, row_container, col_container> &b) const {
+    Matrix<T, row_container, col_container> tmp(*this);
     tmp -= b;
     return tmp;
   }
 
-  constexpr Matrix<T> operator-() const {
-    Matrix<T> tmp;
-    tmp.resize(data__.size(), data__[0].size());
+  constexpr Matrix<T, row_container, col_container> operator-() const {
+    Matrix<T, row_container, col_container> tmp(*this);
+    tmp -= (*this);
     tmp -= (*this);
     return tmp;
   }
 
-  constexpr Matrix<T> transpose() const {
-    Matrix<T> tmp;
+  constexpr Matrix<T, row_container, col_container> transpose() const {
+    Matrix<T, row_container, col_container> tmp;
     tmp.resize(data__[0].size(), data__.size());
 
-    for (typename Matrix<T>::matrix_type::size_type i = 0; i < data__.size();
-         ++i) {
-      for (typename Matrix<T>::vector_type::size_type ii = 0;
+    for (typename Matrix<T, row_container,
+                         col_container>::matrix_type::size_type i = 0;
+         i < data__.size(); ++i) {
+      for (typename Matrix<T, row_container,
+                           col_container>::vector_type::size_type ii = 0;
            ii < data__[0].size(); ++ii) {
         tmp[ii][i] = data__[i][ii];
       }
@@ -150,11 +160,89 @@ public:
     return tmp;
   }
 
-  constexpr std::weak_ordering operator<=>(const Matrix<T> &rhs) const {
+  template <typename U = int>
+  constexpr typename std::enable_if<std::is_integral<U>::value, U>::type
+  rank() const {
+    auto mat = *this;
+    int rank = mat.data__[0].size();
+
+    for (U row = 0; row < rank; row++) {
+      // Before we visit current row 'row', we make
+      // sure that mat[row][0],....mat[row][row-1]
+      // are 0.
+
+      // Diagonal element is not zero
+      if (mat.data__[row][row]) {
+        for (U col = 0; col < mat.data__.size(); col++) {
+          if (col != row) {
+            // This makes all entries of current
+            // column as 0 except entry 'mat[row][row]'
+            double mult = static_cast<double>(mat.data__[col][row]) /
+                          mat.data__[row][row];
+            for (U i = 0; i < rank; i++)
+              mat.data__[col][i] -= mult * mat.data__[row][i];
+          }
+        }
+      }
+
+      // Diagonal element is already zero. Two cases
+      // arise:
+      // 1) If there is a row below it with non-zero
+      //    entry, then swap this row with that row
+      //    and process that row
+      // 2) If all elements in current column below
+      //    mat[r][row] are 0, then remove this column
+      //    by swapping it with last column and
+      //    reducing number of columns by 1.
+      else {
+        bool reduce = true;
+
+        /* Find the non-zero element in current
+            column  */
+        for (U i = row + 1; i < mat.data__.size(); i++) {
+          // Swap the row with non-zero element
+          // with this row.
+          if (mat.data__[i][row]) {
+            // swap(mat.data__, row, i, rank);
+            // Swap values in rows until the current rank.
+            for (U ii = 0; ii < rank; ++ii) {
+              int temp = mat.data__[row][ii];
+              mat.data__[row][ii] = mat.data__[i][ii];
+              mat.data__[i][ii] = temp;
+            }
+
+            reduce = false;
+            break;
+          }
+        }
+
+        // If we did not find any row with non-zero
+        // element in current column, then all
+        // values in this column are 0.
+        if (reduce) {
+          // Reduce number of columns
+          rank--;
+
+          // Copy the last column here
+          for (U i = 0; i < mat.data__.size(); i++)
+            mat.data__[i][row] = mat.data__[i][rank];
+        }
+
+        // Process this row again
+        row--;
+      }
+    }
+    return rank;
+  }
+
+  constexpr std::weak_ordering
+  operator<=>(const Matrix<T, row_container, col_container> &rhs) const {
     std::weak_ordering tmp = std::weak_ordering::equivalent;
-    for (typename Matrix<T>::matrix_type::size_type i = 0;
+    for (typename Matrix<T, row_container,
+                         col_container>::matrix_type::size_type i = 0;
          i < rhs.data__.size(); ++i) {
-      for (typename Matrix<T>::vector_type::size_type ii = 0;
+      for (typename Matrix<T, row_container,
+                           col_container>::vector_type::size_type ii = 0;
            ii < rhs.data__[0].size(); ++ii) {
         std::weak_ordering cmp_val = std::weak_ordering::equivalent;
         if constexpr (std::is_same<T, std::string>::value) {
@@ -174,10 +262,12 @@ public:
   endloop:
     return tmp;
   }
-  constexpr bool operator==(const Matrix<T> &rhs) const {
+  constexpr bool
+  operator==(const Matrix<T, row_container, col_container> &rhs) const {
     return ((*this) <=> rhs) == 0;
   }
-  constexpr bool operator!=(const Matrix<T> &rhs) const {
+  constexpr bool
+  operator!=(const Matrix<T, row_container, col_container> &rhs) const {
     return !((*this) == rhs);
   }
   using iterator = typename matrix_type::iterator;
