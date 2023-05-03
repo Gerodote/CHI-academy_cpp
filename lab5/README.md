@@ -8,7 +8,7 @@ Also, there was a task to make a really specific test. I've done it.
 
 **A:** : run following:
 
-`cmake -S. -Bbuild`  ( yes, it will download boost::log through CPM )
+`cmake -S. -Bbuild`  ( yes, it will download boost::log through CPM, it can take 10 minutes. )
 
 `cmake --build ./build`
 
