@@ -33,6 +33,11 @@ add_test(
     COMMAND tests_target
 )
 
+add_executable(test_lab5 test_lab5.cpp)
+target_link_libraries(test_lab5 PRIVATE libQueue Boost::log)
+
+add_test(NAME lab5_test COMMAND test_lab5)
+
 # Add a custom target that runs the tests using CTest
 add_custom_target(run_tests
     COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure -C $<CONFIG>
