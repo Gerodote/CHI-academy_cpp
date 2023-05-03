@@ -26,6 +26,13 @@
 #include <type_traits>
 #include <vector>
 
+template <bool condition, typename Then, typename Else> struct IF {
+  typedef Else type;
+};
+template <typename Then, typename Else> struct IF<true, Then, Else> {
+  typedef Then type;
+};
+
 template <typename T>
 constexpr std::ostream &specific_printer(
     std::ostream &out,
@@ -47,6 +54,12 @@ template <typename T = int,
           template <class, typename...> class col_container = std::vector>
 class Matrix {
   col_container<row_container<T>> data__;
+
+  template <typename U, 
+          template <class, typename...> class row_container_2,
+          template <class, typename...> class col_container_2 >
+  friend class Matrix;
+
   using matrix_type = typename std::remove_reference<decltype(data__)>::type;
   using vector_type = typename std::remove_reference<decltype(data__[0])>::type;
 
@@ -163,10 +176,19 @@ public:
   template <typename U = int>
   constexpr typename std::enable_if<std::is_integral<U>::value, U>::type
   rank() const {
+    
+    // create matrix
+    // if  matrix contains a string, then type is int64_t, corresponding to probable lengthes of strings
+    // if not a string -> just internal type. 
+    Matrix<typename IF<std::is_same<T, const char *>::value ||
+                           std::is_same<T, std::string>::value,
+                       int64_t, T>::type,
+           row_container, col_container>
+        mat;
+
+    // code specific to string-matrix realization
     if constexpr (std::is_same<T, const char *>::value ||
                   std::is_same<T, std::string>::value) {
-      // create garbage filled matrix with sizes of initial matrix
-      Matrix<int64_t, row_container, col_container> mat;
       // those two if statements are needed for case of std::vector. for
       // std::array they should not be executed. actually, those if should be if
       // constexpr statements, but let's assume we allow other containers.
@@ -194,7 +216,7 @@ public:
       }
 
     } else {
-      auto mat = *this;
+      mat = *this;
     }
     int rank = mat.data__[0].size();
 

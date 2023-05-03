@@ -1,6 +1,6 @@
 #include <array>
-#include <vector>
 #include <typeinfo>
+#include <vector>
 
 #include "Matrix.hpp"
 
@@ -114,7 +114,7 @@ int main() {
       }
 
       auto s4 = -s3;
-      
+
       if (s4[0] != std::vector<int>({-1, -2}) ||
           s4[1] != std::vector<int>({-5, -3})) {
         std::cerr << "Test 15 failed. a result is:\n " << s4;
@@ -125,44 +125,68 @@ int main() {
       if (s4 != s3) {
         std::cerr << "Test 16 failed. a result of comparisong: " << (s4 != s3);
       }
-      
 
-      int res_test_18 = s4.rank();
-      
-      std::cout << res_test_18 << '\n';
-      
-    }
-    {
-      Matrix<std::string> str_m =
-          std::vector<std::vector<std::string>>({{"a", "b"}, {"c", "d"}});
+      int res_test_17 = s4.rank();
 
-      std::cout << str_m << '\n';
-
-      Matrix<std::string> str_m2 =
-          std::vector<std::vector<std::string>>({{"e", "f"}, {"g", "h"}});
-
-      auto res_test_17 = (str_m == str_m2);
-      if (!res_test_17) {
-        std::cerr << "Test 17 failed. a result of comparisong: "
-                  << (res_test_17);
+      if (res_test_17 != 2) {
+        std::cerr << "Test 17 failed. an actual result: " << res_test_17
+                  << '\n';
       }
+      {
 
+        Matrix<std::string> str_m =
+            std::vector<std::vector<std::string>>({{"a", "b"}, {"c", "d"}});
 
-      
+        std::cout << str_m << '\n';
+
+        Matrix<std::string> str_m2 =
+            std::vector<std::vector<std::string>>({{"e", "f"}, {"g", "h"}});
+
+        auto res_test_18 = (str_m == str_m2);
+        if (!res_test_18) {
+          std::cerr << "Test 18 failed. a result of comparisong: "
+                    << (res_test_18);
+        }
+
+        Matrix<std::string> str_m3 = std::vector<std::vector<std::string>>(
+            {{"a", "bb"}, {"ccc", "dddd"}});
+
+        auto res_test_19 = str_m3.rank();
+
+        if (res_test_19 != 2) {
+          std::cerr << "Test 19 failed. a result of comparisong: "
+                    << (res_test_19);
+        }
+      }
 
       constexpr std::array<std::array<int, 2>, 2> const_arr{{{1, 2}, {2, 4}}};
 
       constexpr Matrix<int, arr_si_2, arr_si_2> const_m = const_arr;
-      
+
       constexpr auto const_m2 = -const_m;
 
       constexpr int a_rank = const_m.rank();
 
-      std::cout << a_rank << '\n';
+      if (a_rank != 1) {
+        std::cerr << "Test 20 failed. a result of comparisong: " << (a_rank);
+      }
 
+      // constexpr std::string s1("a");
+      // constexpr std::string s2("bb");
+      // constexpr std::string s3("ccc");
+      // constexpr std::string s4("dddd");
+
+      // constexpr std::array<std::array<std::string, 2>, 2> const_arr2{{{s1,
+      // s2}, {s3, s4}}};
+
+      // constexpr Matrix<const char*, arr_si_2, arr_si_2> const_sm =
+      // const_arr2;
+
+      // auto int a_rank_2 = const_sm.rank();
+
+      // std::cout << a_rank_2 << '\n';
 
       std::cout << const_m;
-
     }
   } catch (const std::exception &e) {
     std::cerr << e.what() << '\n';
