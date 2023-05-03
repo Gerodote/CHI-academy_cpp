@@ -26,6 +26,13 @@
 #include <type_traits>
 #include <vector>
 
+template <bool condition, typename Then, typename Else> struct IF {
+  typedef Else type;
+};
+template <typename Then, typename Else> struct IF<true, Then, Else> {
+  typedef Then type;
+};
+
 template <typename T>
 constexpr std::ostream &specific_printer(
     std::ostream &out,
@@ -47,6 +54,12 @@ template <typename T = int,
           template <class, typename...> class col_container = std::vector>
 class Matrix {
   col_container<row_container<T>> data__;
+
+  template <typename U, 
+          template <class, typename...> class row_container_2,
+          template <class, typename...> class col_container_2 >
+  friend class Matrix;
+
   using matrix_type = typename std::remove_reference<decltype(data__)>::type;
   using vector_type = typename std::remove_reference<decltype(data__[0])>::type;
 
@@ -163,7 +176,48 @@ public:
   template <typename U = int>
   constexpr typename std::enable_if<std::is_integral<U>::value, U>::type
   rank() const {
-    auto mat = *this;
+    
+    // create matrix
+    // if  matrix contains a string, then type is int64_t, corresponding to probable lengthes of strings
+    // if not a string -> just internal type. 
+    Matrix<typename IF<std::is_same<T, const char *>::value ||
+                           std::is_same<T, std::string>::value,
+                       int64_t, T>::type,
+           row_container, col_container>
+        mat;
+
+    // code specific to string-matrix realization
+    if constexpr (std::is_same<T, const char *>::value ||
+                  std::is_same<T, std::string>::value) {
+      // those two if statements are needed for case of std::vector. for
+      // std::array they should not be executed. actually, those if should be if
+      // constexpr statements, but let's assume we allow other containers.
+      if (data__.size() != mat.data__.size()) {
+        mat.data__.resize(data__.size());
+      }
+      if (data__[0].size() != mat.data__[0].size()) {
+        for (auto &row : mat.data__) {
+          row.resize(data__[0].size());
+        }
+      }
+      // fill the matrix with lengthes of initial matrix data
+      if constexpr (std::is_same<T, std::string>::value) {
+        for (U row = 0; row < data__.size(); row++) {
+          for (U col = 0; col < data__[0].size(); col++) {
+            mat.data__[row][col] = data__[row][col].size();
+          }
+        }
+      } else {
+        for (U row = 0; row < data__.size(); row++) {
+          for (U col = 0; col < data__[0].size(); col++) {
+            mat.data__[row][col] = strlen(data__[row][col]);
+          }
+        }
+      }
+
+    } else {
+      mat = *this;
+    }
     int rank = mat.data__[0].size();
 
     for (U row = 0; row < rank; row++) {
