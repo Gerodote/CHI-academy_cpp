@@ -106,7 +106,7 @@ int main() {
                   << (*ic3)[1];
       }
 
-      std::sort(s3.begin(), s3.end(), std::less<std::vector<int>>());
+      std::sort(s3.begin(), s3.end());
 
       if (s3[0] != std::vector<int>({1, 2}) ||
           s3[1] != std::vector<int>({5, 3})) {

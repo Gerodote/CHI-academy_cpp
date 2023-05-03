@@ -163,7 +163,39 @@ public:
   template <typename U = int>
   constexpr typename std::enable_if<std::is_integral<U>::value, U>::type
   rank() const {
-    auto mat = *this;
+    if constexpr (std::is_same<T, const char *>::value ||
+                  std::is_same<T, std::string>::value) {
+      // create garbage filled matrix with sizes of initial matrix
+      Matrix<int64_t, row_container, col_container> mat;
+      // those two if statements are needed for case of std::vector. for
+      // std::array they should not be executed. actually, those if should be if
+      // constexpr statements, but let's assume we allow other containers.
+      if (data__.size() != mat.data__.size()) {
+        mat.data__.resize(data__.size());
+      }
+      if (data__[0].size() != mat.data__[0].size()) {
+        for (auto &row : mat.data__) {
+          row.resize(data__[0].size());
+        }
+      }
+      // fill the matrix with lengthes of initial matrix data
+      if constexpr (std::is_same<T, std::string>::value) {
+        for (U row = 0; row < data__.size(); row++) {
+          for (U col = 0; col < data__[0].size(); col++) {
+            mat.data__[row][col] = data__[row][col].size();
+          }
+        }
+      } else {
+        for (U row = 0; row < data__.size(); row++) {
+          for (U col = 0; col < data__[0].size(); col++) {
+            mat.data__[row][col] = strlen(data__[row][col]);
+          }
+        }
+      }
+
+    } else {
+      auto mat = *this;
+    }
     int rank = mat.data__[0].size();
 
     for (U row = 0; row < rank; row++) {
