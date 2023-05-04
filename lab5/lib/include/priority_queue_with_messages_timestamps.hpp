@@ -82,10 +82,11 @@ class PriorityQueueWithMessagesTimestamps : protected std::priority_queue<messag
 
     void pop()
     {
-        std::lock_guard<std::mutex> guard(m);
+        std::unique_lock<std::mutex> guard(m);
         clear_expired();
         if (this->c.empty())
         {
+            guard.unlock();
             BOOST_LOG_TRIVIAL(error) << "Queue is empty";
             throw AccessEmptyQueueException();
         }
@@ -95,18 +96,20 @@ class PriorityQueueWithMessagesTimestamps : protected std::priority_queue<messag
 
     void push(const message_t<T> &value)
     {
-        std::lock_guard<std::mutex> guard(m);
+        std::unique_lock<std::mutex> guard(m);
         clear_expired();
         if (this->c.size() >= max_amount)
         {
             clear_expired();
             if (this->c.size() >= max_amount)
             {
+                guard.unlock();
                 BOOST_LOG_TRIVIAL(error) << "Queue is full";
                 throw LimitReachedException();
             }
         }
         std::priority_queue<message_t<T>, Container_t, Comp>::push(value);
+        guard.unlock();
         auto smth = std::chrono::system_clock::to_time_t(std::get<1>(value));
         BOOST_LOG_TRIVIAL(info) << "Pushed an element "
                                 << " priority: " << std::setw(5) << std::get<0>(value)
@@ -116,10 +119,11 @@ class PriorityQueueWithMessagesTimestamps : protected std::priority_queue<messag
 
     template <class... Args> void emplace(Args &&...args)
     {
-        std::lock_guard<std::mutex> guard(m);
+        std::unique_lock<std::mutex> guard(m);
         clear_expired();
         if (this->c.size() >= max_amount)
         {
+            guard.unlock();
             BOOST_LOG_TRIVIAL(error) << "Queue is full";
             throw LimitReachedException();
         }
@@ -128,10 +132,11 @@ class PriorityQueueWithMessagesTimestamps : protected std::priority_queue<messag
 
     const message_t<T> &top()
     {
-        std::lock_guard<std::mutex> guard(m);
+        std::unique_lock<std::mutex> guard(m);
         clear_expired();
         if (this->c.empty())
-        {
+        {   
+            guard.unlock();
             BOOST_LOG_TRIVIAL(error) << "Queue is empty";
             throw AccessEmptyQueueException();
         }
