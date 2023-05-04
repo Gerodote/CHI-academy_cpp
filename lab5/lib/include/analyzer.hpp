@@ -28,21 +28,24 @@ class QueueAnalyzer
             throw std::runtime_error("Failed to open file for writing.");
         }
         
-        std::lock_guard<std::mutex> guard(queue_.m);
+        std::unique_lock<std::mutex> guard(queue_.m);
+
+        const auto copy = queue_.c;
+        guard.unlock();
 
         // Get the current time
         const auto current_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
         file << "Current time: " << std::ctime(&current_time);
 
         // Get the size of the queue in KiB
-        const auto queue_size_kib = (queue_.c.size() * sizeof(typename Container_t::value_type)) >> 10;
-        file << "Queue size: " << queue_.c.size() << "\n";
+        const auto queue_size_kib = (copy.size() * sizeof(typename Container_t::value_type)) >> 10;
+        file << "Queue size: " << copy.size() << "\n";
         file << "Queue size (KiB): " << queue_size_kib << "\n";
 
         // Calculate the percentage of messages by their priority
         std::unordered_map<priority_type, uint64_t> count;
-        count.reserve(queue_.c.size());
-        for (const auto &message : queue_.c)
+        count.reserve(copy.size());
+        for (const auto &message : copy)
         {
             if (count.find(std::get<0>(message)) == count.end())
             {
@@ -56,15 +59,15 @@ class QueueAnalyzer
         file << "Priority distribution:\n";
         for (const auto &pair : count)
         {
-            const auto percentage = (pair.second * 100.0) / queue_.c.size();
+            const auto percentage = (pair.second * 100.0) / copy.size();
             file << "Priority " << pair.first << ": " << percentage << "%\n";
         }
 
         // Get the max time difference of messages
-        if (!queue_.c.empty())
+        if (!copy.empty())
         {
             const auto minmax_it =
-                std::minmax_element(queue_.c.begin(), queue_.c.end(), [](const auto &lhs, const auto &rhs) {
+                std::minmax_element(copy.begin(), copy.end(), [](const auto &lhs, const auto &rhs) {
                     return std::get<1>(lhs) < std::get<1>(rhs);
                 });
             const auto &oldest_message = *minmax_it.first;
