@@ -6,13 +6,24 @@ Also, there was a task to make a really specific test. I've done it.
 
 **Q:** how to run the test?
 
-**A:** : run following:
+**A:** : run sequentially:
 
-`cmake -S. -Bbuild`  ( yes, it will download boost::log through CPM, it can take 10 minutes. )
+1.`cmake -S. -Bbuild`  ( yes, it will download boost::log through CPM, it can take 10 minutes. )
 
-`cmake --build ./build`
+2.`cmake --build ./build` ( yes, it will compile some parts of boost. It's another time-comsuming event )
 
-`./build/test/test_lab5`
+Then:
+
+a.
+
+`./build/test/test_lab5` ( it will be doing a printing of some stuff and creating files like "analysis_02.txt". It's going to be completed in 5 minutes. )
+
+b.
+
+`cd build`
+
+`ctest --verbose` ( same. also, the command does unit tests from lab3 )
+
 
 possible output :
 ```
