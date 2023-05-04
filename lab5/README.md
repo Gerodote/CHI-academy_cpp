@@ -48,3 +48,19 @@ possible output :
 [2023-05-04 02:27:23.464635] [0x00007f997292c6c0] [info]    Analyzing...
 [2023-05-04 02:27:23.465188] [0x00007f997292c6c0] [info]    Will be analyzing at most at 2023-05-04 02:27:56
 ```
+In files `analysis_*.txt` can be something like this:
+```
+Current time: Thu May  4 03:05:51 2023
+Queue size: 15
+Queue size (KiB): 0
+Priority distribution:
+Priority -5: 13.3333%
+Priority -4: 40%
+Priority -3: 6.66667%
+Priority -2: 13.3333%
+Priority 0: 6.66667%
+Priority -1: 13.3333%
+Priority 2: 6.66667%
+Max time difference of messages (s): 14
+```
+
