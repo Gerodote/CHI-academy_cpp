@@ -1,6 +1,6 @@
 # CHI-academy_cpp
 
-It is code that i made during pre-intern course of C++ in an academy of CHI company.
+It's a code I made during pre-intern course of C++ in an academy of CHI company.
 There was 5 labs.
 If you are lurking for a useful code, you can try check 5th lab or 4th. those aren't that bad, actually.
 
