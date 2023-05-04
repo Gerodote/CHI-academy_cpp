@@ -142,6 +142,7 @@ int main()
     t4.request_stop();
     t4.join();
     t5.request_stop();
+    cv.notify_all();
     t5.join();
 
     BOOST_LOG_TRIVIAL(info) << "Amount of calls of analyzer is " << counter << '\n';
