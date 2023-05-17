@@ -12,4 +12,4 @@ the tasks were:
 4. write a matrix library that can be constexpr, have +-, can be compared, can be calculated rank, can be printed in different ways depending on internal type of the matrix. if internal type is a string type, then matrix can be printed only using separator | . if there's needed an arithmetic stuff, then if there's a string type, calculate it length. Because of strange requirement to make a test in main.cpp, it's done without any test framework. No external lib used.
 5. rewrite lab3 in threadsafe manner with logging and write a really specific test. Here's used boost::log library, so the code have the boost license.
 
-Also, I got a certificate from the course. I won't show it here. Maybe in-person, if you want, I can show you.
+Also, I got a certificate from the course. I won't present it here. Maybe in-person, if you want, I can show you.
